@@ -18,3 +18,6 @@ dist/
 app/data/documents.npy
 app/data/vector.index
 app/data/knowledge_base/knowledge_base.txt
+
+# Environment variables
+.env
