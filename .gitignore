@@ -1,0 +1,20 @@
+# Virtual environment
+venv/
+
+# IDE and editor files
+.vscode/
+.idea/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Build artifacts
+build/
+dist/
+*.egg-info
+
+# Data files
+app/data/documents.npy
+app/data/vector.index
+app/data/knowledge_base/knowledge_base.txt
