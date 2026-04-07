@@ -49,6 +49,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from app.orchestrator.graph import build_graph
 from app.memory.vector_store import load_vector_store
 import json
+from app.tools.formatter import format_medical_response
 
 def run_agentic_system(user_input: str, chat_history: list):
     load_vector_store()
@@ -70,13 +71,23 @@ if __name__ == "__main__":
             break
             
         result = run_agentic_system(user_input, chat_history)
-        
+
         # Add the interaction to the chat history
         chat_history.append({"role": "user", "content": user_input})
-        # The 'assistant' role will be the full JSON output for now
-        # In a real application, you might want to summarize this
+        # Store the raw assistant output in the chat history
         chat_history.append({"role": "assistant", "content": json.dumps(result)})
-        
-        print("\nAssistant:")
-        print(json.dumps(result, indent=2))
+
+        # Format the assistant response for human-friendly display
+        try:
+            formatted = format_medical_response(result)
+            # Print an easy-to-read summary plus immediate actions
+            print("\nAssistant (summary):\n")
+            print(formatted.get("pretty_text", ""))
+            # Also print the structured JSON for machine use
+            print("\nAssistant (raw JSON):")
+            print(json.dumps(formatted, indent=2))
+        except Exception:
+            # Fallback to raw output if formatting fails
+            print("\nAssistant (raw):")
+            print(json.dumps(result, indent=2))
         print("\n" + "="*50 + "\n")
