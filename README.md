@@ -39,18 +39,18 @@ This README documents the pipeline flow, setup, and how to run the project local
 - Runtime: `app.main` calls `load_vector_store()` before invoking the graph so retrieval works.
 
 **Maps (OpenStreetMap stack)**
-- Geocoding: Nominatim (OSM) via `app/tools/mcp_maps.py`
-- Hospitals: Overpass API within 5 km radius
-- Travel time: OSRM (optional)
-- Fallback Overpass endpoints are used automatically if a primary endpoint times out.
+- Geocoding: Nominatim (OSM)
+- Hospitals: Overpass API (nearby search)
+- Travel time: OSRM
+- The system uses fallback endpoints for better reliability.
 
 **Configuration / LLM**
 - `app/config.py` wraps the Groq client. Required environment variables:
   - `GROQ_API_KEY` — API key for Groq
   - `MODEL_NAME` — model identifier to call
 
-**Configuration / OSM**
-Optional environment variables (defaults are safe for local use):
+**Configuration / Maps**
+OSM variables:
 - `NOMINATIM_URL` — default `https://nominatim.openstreetmap.org/search`
 - `OVERPASS_URL` — default `https://overpass-api.de/api/interpreter`
 - `OSRM_URL` — default `http://router.project-osrm.org/route/v1/driving`

@@ -170,7 +170,7 @@ def build_graph():
         return {"tests": tests}
 
     def emergency_node(state):
-        print("--- EMERGENCY DETECTEBD ---")
+        print("--- EMERGENCY DETECTED ---")
         print("Generating immediate first-aid advice...")
         from app.schemas.patient import PatientData
         patient = PatientData(**state["patient"])
@@ -191,9 +191,11 @@ def build_graph():
         payload = res.get("result") if res.get("ok") else res.get("result")
         try:
             hospitals = payload.get("hospitals", []) if isinstance(payload, dict) else payload
+            meta = payload.get("hospital_search_meta", {}) if isinstance(payload, dict) else {}
         except Exception:
             hospitals = []
-        return {"hospitals": hospitals}
+            meta = {}
+        return {"hospitals": hospitals, "hospital_search_meta": meta}
 
     def await_location_node(state):
         # Placeholder node when waiting for user location input
@@ -241,18 +243,16 @@ def build_graph():
         # If location missing, stop and ask user for it
         if state.get("need_location"):
             return "await_location"
-        return "hospital"
+        return "triage"
 
     graph.add_conditional_edges(
         "location",
         route_after_location,
         {
-            "hospital": "hospital",
+            "triage": "triage",
             "await_location": "await_location",
         }
     )
-
-    graph.add_edge("hospital", "triage")
 
     # Conditional routing after triage
     def route_after_triage(state):
@@ -269,12 +269,15 @@ def build_graph():
         }
     )
     
-    # Emergency now proceeds directly to risk (hospital search already done after location)
-    graph.add_edge("emergency", "risk")
+    # Emergency still gets diagnosis so hospitals can be ranked by diagnosis context
+    graph.add_edge("emergency", "diagnosis")
 
-    # Conditional routing after diagnosis
+    # Always run hospital discovery after diagnosis
+    graph.add_edge("diagnosis", "hospital")
+
+    # Conditional routing after hospital (based on diagnosis confidence)
     graph.add_conditional_edges(
-        "diagnosis",
+        "hospital",
         route_after_diagnosis,
         {
             "risk": "risk",

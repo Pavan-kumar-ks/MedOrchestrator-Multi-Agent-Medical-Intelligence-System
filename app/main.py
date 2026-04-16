@@ -54,7 +54,15 @@ if __name__ == "__main__":
     session_memory = SessionMemory()
     
     while True:
-        user_input = input("You: ")
+        try:
+            user_input = input("You: ")
+        except EOFError:
+            # Gracefully exit when stdin is exhausted (e.g., piped/scripted runs)
+            print("\nAssistant:\nSession ended.")
+            break
+        except KeyboardInterrupt:
+            print("\nAssistant:\nSession interrupted.")
+            break
         if user_input.lower() in ["quit", "exit"]:
             break
 
@@ -84,17 +92,27 @@ if __name__ == "__main__":
         # Step 3: Collect location (before diagnosis)
         # Handle confirmation response before attempting new geocoding
         if session_memory.get("confirm_location"):
-            if user_input.strip().lower() in ["yes", "y", "correct"]:
+            answer = user_input.strip().lower()
+            if answer in ["yes", "y", "correct"] or answer.startswith("y"):
                 cand = session_memory.get("location_candidate")
                 if isinstance(cand, dict):
                     session_memory.set("location", cand)
                 session_memory.set("confirm_location", False)
-            else:
+                print("\nAssistant:")
+                print("Location confirmed. Please describe your symptoms.")
+                print("\n" + "="*50 + "\n")
+                continue
+            elif answer in ["no", "n", "incorrect"] or answer.startswith("n"):
                 # Ask user for a better location hint
                 session_memory.set("confirm_location", False)
                 session_memory.set("awaiting_location", True)
                 print("\nAssistant:")
                 print("Please provide a nearby landmark or more specific location.")
+                print("\n" + "="*50 + "\n")
+                continue
+            else:
+                print("\nAssistant:")
+                print("Please answer with yes or no so I can confirm your location.")
                 print("\n" + "="*50 + "\n")
                 continue
 
@@ -125,6 +143,13 @@ if __name__ == "__main__":
             session_memory.set("awaiting_location", True)
             continue
             
+        # Ignore empty input after onboarding
+        if not user_input.strip():
+            print("\nAssistant:")
+            print("Please describe your symptoms so I can assess your condition.")
+            print("\n" + "="*50 + "\n")
+            continue
+
         result = run_agentic_system(user_input, chat_history, session_memory)
 
         # Add the interaction to the chat history (stored but not printed)
@@ -139,23 +164,9 @@ if __name__ == "__main__":
         try:
             formatted = format_medical_response(result)
 
-            # Print agent execution trace (what ran during this request)
-            trace = result.get("_agent_trace", [])
-            if trace:
-                print("\nAgent execution trace:")
-                for t in trace:
-                    name = t.get("agent")
-                    ok = t.get("ok")
-                    attempts = t.get("attempts")
-                    print(f" - {name}: ok={ok} attempts={attempts}")
-
-            # Print an easy-to-read summary plus immediate actions
-            print("\nAssistant (summary):\n")
+            # Print concise, user-facing summary
+            print("\nAssistant:\n")
             print(formatted.get("pretty_text", ""))
-
-            # Also print the sanitized structured JSON for machine use
-            print("\nAssistant (raw JSON):")
-            print(json.dumps(formatted, indent=2))
         except Exception:
             # Fallback to raw output if formatting fails
             print("\nAssistant (raw):")

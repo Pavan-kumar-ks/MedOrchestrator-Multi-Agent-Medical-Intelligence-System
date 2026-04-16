@@ -55,6 +55,7 @@ def format_medical_response(response: Dict[str, Any]) -> Dict[str, Any]:
 
     # Hospitals (if found)
     hospitals = response.get("hospitals") or (response.get("raw") or {}).get("hospitals") or []
+    hospital_meta = response.get("hospital_search_meta") or (response.get("raw") or {}).get("hospital_search_meta") or {}
 
     # Build short prioritized immediate actions
     immediate_actions = []
@@ -139,14 +140,25 @@ def format_medical_response(response: Dict[str, Any]) -> Dict[str, Any]:
             name = h.get("name") or "Hospital"
             addr = h.get("address") or ""
             phone = h.get("phone") or ""
+            distance = h.get("distance_m")
+            travel = h.get("travel_time_s")
             line = name
             if addr:
                 line += f" — {addr}"
             if phone:
                 line += f" (Phone: {phone})"
+            if isinstance(distance, (int, float)):
+                line += f" [{distance/1000:.1f} km]"
+            if isinstance(travel, (int, float)):
+                line += f" (~{int(round(travel/60))} min)"
             hosp_lines.append(line)
         if hosp_lines:
-            pretty_sections.append(_join_lines("Nearby hospitals", hosp_lines))
+            pretty_sections.append(_join_lines("Nearby hospitals (3 diagnosis-aligned + 2 nearby)", hosp_lines))
+    else:
+        # Friendly note when geo services return no nearby facilities
+        radius_used = hospital_meta.get("radius_used_m")
+        if radius_used:
+            pretty_sections.append("Nearby hospitals\nNo hospitals found in the current radius search.")
 
     # If emergency, include emergency contact numbers (configurable later)
     # If emergency, include emergency contact numbers fetched at runtime
