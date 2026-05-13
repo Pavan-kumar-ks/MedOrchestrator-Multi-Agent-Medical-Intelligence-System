@@ -187,6 +187,14 @@ python scripts/ingest_kb.py
 python app/main.py
 ```
 
+6. Start the browser frontend:
+
+```powershell
+uvicorn app.api:app --reload
+```
+
+Then open `http://127.0.0.1:8000`.
+
 ## Observability & Logging
 
 All agent invocations are logged as newline-delimited JSON (JSONL) for observability:

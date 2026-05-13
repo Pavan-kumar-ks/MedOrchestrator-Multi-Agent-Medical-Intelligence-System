@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MedOrchestrator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <aside class="sidebar" aria-label="Clinical workspace overview">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 48 48" role="img">
+              <path d="M24 5.5 39.8 12v10.8c0 10-6.5 18.9-15.8 21.8C14.7 41.7 8.2 32.8 8.2 22.8V12L24 5.5Z" fill="currentColor" opacity=".16"/>
+              <path d="M24 10.2 35.2 15v8c0 7.4-4.5 14-11.2 16.6C17.3 37 12.8 30.4 12.8 23v-8L24 10.2Z" fill="none" stroke="currentColor" stroke-width="2.2"/>
+              <path d="M24 16.2v15.6M16.2 24h15.6" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <p class="eyebrow">Medical Multi-Agent</p>
+            <h1>MedOrchestrator</h1>
+          </div>
+        </div>
+
+        <section class="status-panel" aria-label="Session status">
+          <div class="status-row">
+            <span>Patient</span>
+            <strong id="patientStatus">Not set</strong>
+          </div>
+          <div class="status-row">
+            <span>Location</span>
+            <strong id="locationStatus">Pending</strong>
+          </div>
+          <div class="status-row">
+            <span>Mode</span>
+            <strong id="modeStatus">Intake</strong>
+          </div>
+        </section>
+
+        <section class="agent-rail" aria-label="Agent pipeline">
+          <div class="rail-header">
+            <span>Pipeline</span>
+            <button id="traceToggle" class="icon-button" type="button" title="Show agent trace" aria-label="Show agent trace">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h16" /></svg>
+            </button>
+          </div>
+          <ol id="pipelineList">
+            <li data-agent="question_classifier">Question classifier</li>
+            <li data-agent="domain_expert">Domain expert</li>
+            <li data-agent="intake">Intake</li>
+            <li data-agent="location">Location</li>
+            <li data-agent="triage">Triage</li>
+            <li data-agent="diagnosis">Diagnosis</li>
+            <li data-agent="panel">Medical panel</li>
+            <li data-agent="hospital">Hospital finder</li>
+            <li data-agent="risk">Risk analyzer</li>
+            <li data-agent="tests">Test recommender</li>
+          </ol>
+        </section>
+
+        <button id="newSessionButton" class="secondary-button" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v6h-6" /></svg>
+          New session
+        </button>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">AI-assisted clinical decision support</p>
+            <h2>Patient consultation</h2>
+          </div>
+          <div class="safety-chip">Not a substitute for emergency care</div>
+        </header>
+
+        <section class="hero-strip" aria-label="Clinical command center">
+          <div class="hero-copy">
+            <span class="signal-dot"></span>
+            <span>Multi-agent diagnosis, panel review, hospital matching, and doctor lookup in one guided flow.</span>
+          </div>
+          <div class="hero-vitals" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </section>
+
+        <section class="content-grid">
+          <div class="chat-column">
+            <div id="messages" class="messages" aria-live="polite"></div>
+            <form id="chatForm" class="composer">
+              <textarea id="messageInput" rows="1" placeholder="Describe symptoms, answer the assistant, or select a hospital..." required></textarea>
+              <button id="sendButton" class="send-button" type="submit" title="Send message" aria-label="Send message">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" /></svg>
+              </button>
+            </form>
+          </div>
+
+          <aside class="report-column" aria-label="Latest medical report">
+            <div class="report-header">
+              <div>
+                <p class="eyebrow">Latest output</p>
+                <h3>Assessment board</h3>
+              </div>
+              <span id="reportBadge" class="report-badge">Waiting</span>
+            </div>
+            <div id="reportBoard" class="report-board empty-state">
+              <div class="empty-pulse"></div>
+              <p>Your diagnosis, panel summary, risk flags, tests, and hospitals will appear here after the agents run.</p>
+            </div>
+          </aside>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="traceDialog">
+      <div class="dialog-header">
+        <h3>Agent trace</h3>
+        <button id="traceClose" class="icon-button" type="button" title="Close" aria-label="Close">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <div id="traceList" class="trace-list"></div>
+    </dialog>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
